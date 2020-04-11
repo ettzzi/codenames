@@ -1,0 +1,12 @@
+.Grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(5, 1fr);
+  justify-content: center;
+}
+
+.StatusBar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
