@@ -15,7 +15,6 @@ export const Join = () => {
   });
 
   const onGameJoined = (message: string) => {
-    console.log(message);
     if (message === "NOT_FOUND") {
       return setError(
         `La partita con il codice ${accessCode} non è stata trovata`
@@ -24,6 +23,8 @@ export const Join = () => {
     sessionStorage.setItem("id", message);
     sessionStorage.setItem("name", name);
     sessionStorage.setItem("accessCode", accessCode);
+    sessionStorage.removeItem("spymaster");
+
     setGameJoined(true);
   };
 

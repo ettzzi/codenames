@@ -7,6 +7,7 @@ import { Card } from "./Card";
 import { Banner } from "./Banner";
 
 const initialState = {
+  player: {},
   players: [],
   gameBoard: [],
 };
@@ -23,11 +24,17 @@ export const Game: React.FC = () => {
   const id = sessionStorage.getItem("id");
 
   useEffect(() => {
+    if (state.player.spymaster) {
+      sessionStorage.setItem("spymaster", state.player.spymaster);
+    }
+  }, [state.player.spymaster]);
+
+  useEffect(() => {
     const name = sessionStorage.getItem("name");
     const accessCode = sessionStorage.getItem("accessCode");
+    const spymaster = sessionStorage.getItem("spymaster");
 
     socket?.on("CURRENT_STATE", (newState: any) => {
-      console.log(newState);
       setState(newState);
     });
 
@@ -38,6 +45,7 @@ export const Game: React.FC = () => {
           name,
           accessCode,
           id,
+          spymaster,
         },
         () => {
           console.log("E");

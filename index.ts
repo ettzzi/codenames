@@ -5,6 +5,7 @@ import socketIO from "socket.io";
 import path from "path";
 import { shuffle } from "./utils/shuffle";
 import { Italian } from "./config/words";
+import { CronJob } from "cron";
 
 const app = express();
 app.use(cors());
@@ -32,6 +33,7 @@ interface JoinGameParams {
   id?: string;
   name: string;
   accessCode: string;
+  spymaster?: boolean;
 }
 
 interface Word {
@@ -72,6 +74,32 @@ const activeGames: ActiveGames = {};
 const MAX_RED_CARDS = 9;
 const MAX_BLUE_CARDS = 8;
 
+/** CRON JOB  */
+
+const job = new CronJob("0 0 */2 * * *", function () {
+  console.log(activeGames);
+  for (const key in activeGames) {
+    if (
+      activeGames.hasOwnProperty(key) &&
+      Math.abs(
+        new Date().getTime() - new Date(activeGames[key].startTime).getTime()
+      ) /
+        36e5 >=
+        2
+    ) {
+      delete activeGames[key];
+    }
+  }
+  console.log(
+    "Games removed at: " +
+      new Date().toDateString() +
+      " " +
+      new Date().toTimeString()
+  );
+});
+console.log("cron job created");
+job.start();
+
 /** SOCKET  */
 io.on("connection", (socket: CodenameSocket) => {
   socket.games = [];
@@ -111,7 +139,7 @@ io.on("connection", (socket: CodenameSocket) => {
   });
 
   socket.on("JOIN_GAME", function (input: JoinGameParams, cb: Callback) {
-    const { accessCode, name, id } = input;
+    const { accessCode, name, id, spymaster } = input;
     const game = activeGames[accessCode];
 
     if (!game) {
@@ -132,7 +160,7 @@ io.on("connection", (socket: CodenameSocket) => {
       game.players.push({
         id: socket.playerId,
         owner,
-        spymaster: false,
+        spymaster: spymaster || false,
         name: name,
         team: numRed <= numBlue ? "RED" : "BLUE",
       });
