@@ -24,10 +24,10 @@ export const Game: React.FC = () => {
   const id = sessionStorage.getItem("id");
 
   useEffect(() => {
-    if (state.player.spymaster) {
+    if (state.player && state.player.spymaster) {
       sessionStorage.setItem("spymaster", state.player.spymaster);
     }
-  }, [state.player.spymaster]);
+  }, [state.player]);
 
   useEffect(() => {
     const name = sessionStorage.getItem("name");
