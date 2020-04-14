@@ -15,6 +15,7 @@ const io = socketIO(server);
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "/client")));
 
+app.use("*", express.static(path.join(__dirname, "/client")));
 /** TYPES */
 
 type Team = "RED" | "BLUE";
