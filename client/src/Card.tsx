@@ -2,18 +2,20 @@ import styled from "styled-components";
 
 interface Props {
   color?: "red" | "blue" | "killer" | "innocent";
+  discovered?: boolean;
 }
 
 const colorMap: Record<string, string> = {
   red: "#ff2300",
   blue: "#00AAFF",
-  killer: "#111",
+  killer: "#fff",
   citizen: "#ccc",
   unknown: "#111",
 };
 
 export const Card = styled.button<Props>`
-  background-color: #fff;
+  background: ${(props) =>
+    props.color && props.color.toLowerCase() === "killer" ? "#000" : "#FFF"};
   box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
     0 0 0 1px rgba(10, 10, 10, 0.02);
   color: #4a4a4a;
@@ -24,12 +26,18 @@ export const Card = styled.button<Props>`
   font-weight: bold;
   text-align: center;
   border-radius: 4px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: ${(props) =>
+    props.color && colorMap[props.color.toLowerCase()]};
   color: ${(props) => props.color && colorMap[props.color.toLowerCase()]};
   cursor: pointer;
   &:disabled {
     cursor: not-allowed;
   }
-  &:empty {
-    background-color: #dbdbdb;
+  span:first-child {
+    display: inline-block;
+    margin-right: 4px;
+    text-decoration: ${(props) => (props.discovered ? "line-through" : "none")};
   }
 `;

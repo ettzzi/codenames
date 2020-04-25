@@ -56,6 +56,8 @@ interface Game {
   turn: Team;
   startTime: string;
   winningTeam?: "RED" | "BLUE";
+  remainingBlueCards: number;
+  remainingRedCards: number;
 }
 
 type Callback = (message: string) => void;
@@ -127,15 +129,19 @@ io.on("connection", (socket: CodenameSocket) => {
       turn: "RED",
       gameBoard: [],
       startTime: new Date().toJSON(),
+      remainingRedCards: MAX_RED_CARDS,
+      remainingBlueCards: MAX_BLUE_CARDS,
     };
 
     return onSuccess();
   });
 
   socket.on("SUGGEST_WORD", (config: any) => {
-    activeGames[config.accessCode].suggestion = {
-      ...config,
-    };
+    if (activeGames[config.accessCode]) {
+      activeGames[config.accessCode].suggestion = {
+        ...config,
+      };
+    }
   });
 
   socket.on("JOIN_GAME", function (input: JoinGameParams, cb: Callback) {
@@ -264,6 +270,18 @@ io.on("connection", (socket: CodenameSocket) => {
       return;
     }
 
+    const numRedDiscovered = activeGames[accessCode].gameBoard.filter(
+      (card) => card.color === "RED" && card.discovered
+    ).length;
+    const numBlueDiscovered = activeGames[accessCode].gameBoard.filter(
+      (card) => card.color === "BLUE" && card.discovered
+    ).length;
+
+    activeGames[accessCode].remainingRedCards =
+      MAX_RED_CARDS - numRedDiscovered;
+    activeGames[accessCode].remainingBlueCards =
+      MAX_BLUE_CARDS - numBlueDiscovered;
+
     if (
       activeGames[accessCode].gameBoard[index].color !==
       activeGames[accessCode].turn
@@ -274,13 +292,6 @@ io.on("connection", (socket: CodenameSocket) => {
 
       return;
     }
-
-    const numRedDiscovered = activeGames[accessCode].gameBoard.filter(
-      (card) => card.color === "RED" && card.discovered
-    ).length;
-    const numBlueDiscovered = activeGames[accessCode].gameBoard.filter(
-      (card) => card.color === "BLUE" && card.discovered
-    ).length;
 
     if (numRedDiscovered === MAX_RED_CARDS) {
       activeGames[accessCode].winningTeam = "RED";

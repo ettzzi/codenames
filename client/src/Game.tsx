@@ -5,6 +5,7 @@ import useSocket from "./useSocket";
 import { useParams } from "react-router-dom";
 import { Card } from "./Card";
 import { Banner } from "./Banner";
+import { Text } from "./Text";
 
 const initialState = {
   player: {},
@@ -74,9 +75,14 @@ export const Game: React.FC = () => {
         </Banner>
       )}
       <div>
-        {state.player && (
+        {state.player && state.player.team && (
           <Fragment>
-            <p>{`La tua squadra è la squadra ${state.player.team}`}</p>
+            <p>
+              La tua squadra è la squadra&nbsp;
+              <Text color={state.player.team.toLowerCase()}>
+                {getTeamNameFromColor(state.player.team)}
+              </Text>
+            </p>
             <p>
               Squadra blu:
               {state.players
@@ -94,9 +100,18 @@ export const Game: React.FC = () => {
           </Fragment>
         )}
       </div>
+      {!state.suggestion && state.status === "PLAYING" && state.turn && (
+        <Banner color={state.turn}>
+          {`🔔 Il capitano della squadra ${getTeamNameFromColor(
+            state.turn
+          )} deve dare un suggerimento 🔔 `}
+        </Banner>
+      )}
       {state.suggestion && (
         <Banner color={state.turn}>
-          {`La squadra rossa deve scegliere ${state.suggestion.quantity} parole correlate a ${state.suggestion.word}`}
+          La squadra {getTeamNameFromColor(state.turn)} deve scegliere{" "}
+          <strong>{state.suggestion.quantity}</strong> parole correlate a{" "}
+          <strong>{state.suggestion.word}</strong>
         </Banner>
       )}
       {state.player &&
@@ -171,6 +186,15 @@ export const Game: React.FC = () => {
           </div>
         )}
       {/* Status */}
+      {state.status === "PLAYING" && (
+        <div id="status-line" className="red-turn">
+          <div id="remaining">
+            Carte rimanenti:
+            <span className="Red">{state.remainingRedCards}</span>&nbsp;–&nbsp;
+            <span className="Blue">{state.remainingBlueCards}</span>
+          </div>
+        </div>
+      )}
       <div className="Grid">
         {state.gameBoard.map((card: any, index: number) => (
           <Card
@@ -183,9 +207,23 @@ export const Game: React.FC = () => {
               (card && card.discovered) ||
               (state.player && state.player.spymaster)
             }
+            discovered={
+              state.player && state.player.spymaster && card.discovered
+            }
             color={card && card.color}
           >
-            {card ? card.label : ""}
+            <span>{card ? card.label : ""}</span>
+            <span>
+              {state.player && state.player.spymaster && card.discovered
+                ? "👀"
+                : ""}
+
+              {state.player &&
+                state.player &&
+                card.discovered &&
+                card.color === "KILLER" &&
+                "💀"}
+            </span>
           </Card>
         ))}
       </div>
